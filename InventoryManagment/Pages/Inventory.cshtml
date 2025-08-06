@@ -1,0 +1,113 @@
+﻿@page
+@model InventoryManagment.Pages.InventoryModel
+
+@{
+    ViewData["Title"] = "Inventory Management";
+}
+
+<!-- Main Container -->
+<div class="container mt-5">
+
+    <!-- Header Section -->
+    <h2>@ViewData["Title"]</h2>
+
+    <!-- Form to add new inventory item -->
+    <form method="post" class="row g-3">
+        <div class="col-md-4">
+            <input type="text" name="Name" class="form-control" placeholder="Item Name" required />
+        </div>
+        <div class="col-md-2">
+            <input type="number" name="Quantity" class="form-control" placeholder="Quantity" required />
+        </div>
+        <div class="col-md-3">
+            <input type="text" name="Category" class="form-control" placeholder="Category" />
+        </div>
+        <div class="col-md-12">
+            <textarea name="Description" class="form-control" placeholder="Description"></textarea>
+        </div>
+        <div class="col-md-3">
+            <input type="datetime-local" name="DueDate" class="form-control" />
+        </div>
+        <div class="col-md-3">
+            <select name="Status" class="form-select">
+                <option value="InStock">In Stock</option>
+                <option value="LowStock">Low Stock</option>
+                <option value="Ordered">Ordered</option>
+                <option value="Discontinued">Discontinued</option>
+            </select>
+        </div>
+        <div class="col-md-2">
+            <button type="submit" class="btn btn-primary w-100">Add Item</button>
+        </div>
+    </form>
+
+
+    <hr />
+
+    <!-- AI Summary Section -->
+    <form method="post" asp-page-handler="AiSummarize" class="my-3">
+        <button type="submit" class="btn btn-info">Generate AI Summary for In-Stock Items</button>
+    </form>
+
+    @if (!string.IsNullOrEmpty(Model.AiSummary))
+    {
+        <div class="alert alert-info">
+            <strong>AI Summary:</strong>
+            <p>@Model.AiSummary</p>
+        </div>
+    }
+
+    <!-- Inventory List Table -->
+    <h3>Inventory List</h3>
+    @if (Model.InventoryItems.Any())
+    {
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Item Name</th>
+                    <th>Quantity</th>
+                    <th>Category</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model.InventoryItems)
+                {
+                    <tr>
+                        <td>@item.Name</td>
+                        <td>@item.Quantity</td>
+                        <td>@item.Category</td>
+                        <td>
+                            <span class="badge @(item.Status == "InStock" ? "badge-success" :
+                                                                  item.Status == "LowStock" ? "badge-warning" :
+                                                                  item.Status == "Ordered" ? "badge-info" : "badge-danger")">
+                        @item.Status
+                    </span>
+                </td>
+                <td>
+                    <!-- Edit Button -->
+                    <a href="@Url.Page("EditInventory", new { id = item.Id })" class="btn btn-warning btn-sm">
+                        <i class="fas fa-edit"></i> Edit
+                    </a>
+
+                            <!-- Delete Button -->
+                            <form method="post" asp-page-handler="Delete" asp-route-id="@item.Id" style="display:inline;">
+                                <button type="submit" class="btn btn-danger btn-sm">
+                                    <i class="fas fa-trash-alt"></i> Delete
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+                        }
+
+            </tbody>
+        </table>
+    }
+    else
+    {
+        <p>No items available in the inventory.</p>
+    }
+
+
+</div>
